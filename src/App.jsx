@@ -2,7 +2,7 @@ import { Routes, Route, Link, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ForgetPassword from './pages/ForgetPassword';
 import Dashboard from './pages/Dashboard';
-import ProtectedRoute from './components/ProtectedRoute';
+import ProtectedRoute from './Route/ProtectedRoute';
 
 export default function App() {
   return (
