@@ -1,39 +1,110 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import WidgetCard from '../components/WidgetCard';
-import AddWidgetButton from '../components/AddWidgetButton';
-import { Truck, Users, Clock } from 'lucide-react';
+import { Truck, Users, Clock, List, ChevronDown } from 'lucide-react';
+import { supabase } from '../supabase/supabase.jsx';
 
-const INITIAL_WIDGETS = [
-  { id: 1, title: 'Taux de livraison à temps', value: '72%', icon: <Truck /> },
-  { id: 2, title: 'Fournisseurs actifs', value: '60%', icon: <Users /> },
-  { id: 3, title: 'Taux de livraison à temps', value: '25%', icon: <Truck /> },
-  { id: 4, title: 'Délai moyen de livraison', value: '48h', icon: <Clock /> },
+const kpiOptions = [
+  { key: 'nb_commandes', title: 'Nombre total de commandes', icon: <Users /> },
+  { key: 'taux_retards', title: 'Taux de retard', icon: <Clock /> },
+  { key: 'otif', title: 'Livraison à temps (OTIF)', icon: <Truck /> },
+  { key: 'taux_annulation', title: 'Taux d’annulation', icon: <List /> },
+  { key: 'duree_cycle_moyenne_jours', title: 'Durée moyenne du cycle', icon: <Clock /> },
+  { key: 'avg_changelog_par_commande', title: 'Changelogs / commande', icon: <List /> },
+  { key: 'cout_par_jour_traitement', title: 'Coût par jour de traitement', icon: <Truck /> },
 ];
 
-export default function WidgetsBoard() {
-  const [widgets, setWidgets] = useState(INITIAL_WIDGETS);
 
-  const handleAdd = () => {
-    const newId = widgets.length + 1;
-    setWidgets([
-      ...widgets,
-      { id: newId, title: `Nouveau KPI #${newId}`, value: '0%', icon: <Clock /> },
-    ]);
+export default function WidgetsBoard() {
+  const [kpiData, setKpiData] = useState({});
+  const [selectedKpis, setSelectedKpis] = useState([
+    'nb_commandes',
+    'taux_retards',
+    'otif',
+    'taux_annulation',
+    'duree_cycle_moyenne_jours',
+    'avg_changelog_par_commande',
+     'cout_par_jour_traitement'
+  ]);
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data, error } = await supabase.rpc('get_kpi_commandes');
+      if (!error && data && data.length > 0) {
+        setKpiData(data[0]);console.log(data)
+      } else {
+        console.error('Erreur lors du chargement des KPI', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handleChangeKpi = (index, newKey) => {
+    const newSelections = [...selectedKpis];
+    newSelections[index] = newKey;
+    setSelectedKpis(newSelections);
+    setOpenDropdown(null); 
   };
 
   return (
     <section className="flex flex-col gap-6">
       <div className="flex gap-6 flex-wrap">
-        {widgets.map(w => (
-          <WidgetCard key={w.id} {...w} />
-        ))}
-        <AddWidgetButton onClick={handleAdd} />
+        {selectedKpis.map((key, idx) => {
+          const kpi = kpiOptions.find(k => k.key === key);
+          const value =
+            key === 'nb_commandes'
+              ? kpiData.nb_commandes
+              : key === 'taux_retards'
+              ? `${kpiData.taux_retards}%`
+              : key === 'otif'
+              ? `${kpiData.otif}%`
+              : 'key' === 'taux_annulation'
+              ? `${kpiData.taux_annulation}%`
+              : key === 'duree_cycle_moyenne_jours'
+              ? `${kpiData.duree_cycle_moyenne_jours} jours`
+              : key === 'avg_changelog_par_commande'
+              ? `${kpiData.avg_changelog_par_commande} changelogs`
+              : key === 'cout_par_jour_traitement'
+              ? `${kpiData.cout_par_jour_traitement} €`
+              : 'N/A';
+
+
+          return (
+            <div key={idx} className="relative">
+              <WidgetCard title={kpi.title} value={value} icon={kpi.icon} />
+
+            
+              <button
+                onClick={() => setOpenDropdown(openDropdown === idx ? null : idx)}
+                className="absolute top-2 right-2 text-gray-500 hover:text-black"
+              >
+                <ChevronDown size={18} />
+              </button>
+
+              {/* Menu déroulant personnalisé */}
+              {openDropdown === idx && (
+                <div className="absolute top-10 right-0 bg-white shadow-lg rounded border z-20 w-56">
+                  {kpiOptions.map(option => (
+                    <div
+                      key={option.key}
+                      onClick={() => handleChangeKpi(idx, option.key)}
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                    >
+                      {option.icon}
+                      <span>{option.title}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      <div className=" max-w-md mx-auto bg-gray-300 text-center
-                      text-sm py-2 rounded">
-        Veuillez cliquer sur le bouton « + » pour afficher les KPI
-      </div>
+      <div className="max-w-xl mx-auto bg-blue-100 border border-blue-300 text-blue-800 text-sm text-center py-3 px-4 rounded shadow-sm">
+  Cliquez sur le bouton <strong>« + »</strong> pour afficher les graphiques (à venir).
+</div>
+
     </section>
   );
 }

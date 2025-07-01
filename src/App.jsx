@@ -1,28 +1,47 @@
-import { Routes, Route, Link, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import ForgetPassword from './pages/ForgetPassword';
 import Dashboard from './pages/Dashboard';
+import CommandeClient from './pages/CommandeClient'; 
 import ProtectedRoute from './Route/ProtectedRoute';
+import Reporting from './pages/Reporting';
 
 export default function App() {
   return (
-    <div>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/forgetpassword" element={<ForgetPassword />} />
       
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
 
-      <Routes>
-        <Route path="/login" element={<Login />} />
-         <Route path="/forgetpassword" element={<ForgetPassword/>} />
+      <Route
+        path="/commande-client"
+        element={
+          <ProtectedRoute>
+            <CommandeClient />
+          </ProtectedRoute>
+        }
+      />
+    
+
         <Route
-          path="/dashboard"
-          element={
+           path="/reporting"
+           element={
             <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-       
-        <Route path="/" element={<Navigate to="/login" />} />
-      </Routes>
-    </div>
+              <Reporting />
+             </ProtectedRoute>
+   }
+         />
+
+
+      <Route path="/" element={<Navigate to="/login" />} />
+    </Routes>
   );
 }
