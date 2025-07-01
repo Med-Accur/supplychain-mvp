@@ -43,10 +43,11 @@ export default function Sidebar() {
 
   const menu = [
     { label: 'Accueil', icon: <Home />, path: '/dashboard' },
+    { label: 'Commande Client', icon: <Users />, path: '/commande-client' },
     { label: 'Fournisseur', icon: <Truck />, path: '/fournisseur' },
     { label: 'Stock', icon: <Package />, path: '/stock' },
-    { label: 'Commande Client', icon: <Users />, path: '/commande-client' },
     { label: 'Reporting', icon: <BarChart />, path: '/reporting' },
+
   ];
 
   return (
@@ -58,7 +59,7 @@ export default function Sidebar() {
       {/* Logo et bouton de toggle */}
       <div className="flex items-center justify-between px-4 py-3">
         {width > THRESHOLD && (
-          <img src={logo} alt="AccurConsulting Logo" className="h-10 w-auto" />
+          <img src={logo} alt="AccurConsulting Logo" className="h-14 w-auto" />
         )}
         <button onClick={toggleSidebar} className="text-gray-500 hover:text-black">
           {width > THRESHOLD ? <ChevronsLeft /> : <ChevronsRight />}

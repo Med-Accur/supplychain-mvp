@@ -21,8 +21,7 @@ export default function UserProfileMenu({ userName = "Utilisateur", onLogout }) 
           <ul className="py-2 text-sm">
             <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">About us</li>
             <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Text</li>
-            <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Text</li>
-            <li className="px-4 py-1 hover:bg-gray-100 cursor-pointer">Text</li>
+          
             <li>
               <button
                 onClick={onLogout}

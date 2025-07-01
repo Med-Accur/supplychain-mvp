@@ -16,8 +16,7 @@ export default function MainLayout({ children }) {
       } = await supabase.auth.getUser();
 
       if (user?.email) {
-        const name = formatUserName(user.email); // 👈 transforme email en nom propre
-        setDisplayName(name);
+        const name = formatUserName(user.email)
       }
     };
 
