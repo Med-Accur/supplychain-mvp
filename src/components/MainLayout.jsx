@@ -4,20 +4,24 @@ import UserProfileMenu from '../components/UserProfileMenu';
 import { supabase } from '../supabase/supabase';
 import { useNavigate } from 'react-router-dom';
 import { formatUserName } from '../utils/formatUserName';
+import Header from './Header';
 
 export default function MainLayout({ children }) {
   const navigate = useNavigate();
-  const [displayName, setDisplayName] = useState('Utilisateur');
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-
+      console.log('User:', user);
       if (user?.email) {
-        const name = formatUserName(user.email); // 👈 transforme email en nom propre
+        const name = formatUserName(user.email); 
         setDisplayName(name);
+        setEmail(user.email);
       }
     };
 
@@ -30,11 +34,12 @@ export default function MainLayout({ children }) {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
+     <div className="flex min-h-screen bg-[#F1F3F2] ">
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+       <Header collapsed={collapsed} setCollapsed={setCollapsed} onLogout={logout} email={email} userName={displayName}/>
       <main className="flex-1 p-8">
         <div className="flex justify-end mb-6">
-          <UserProfileMenu userName={displayName} onLogout={logout} />
+          
         </div>
         {children}
       </main>

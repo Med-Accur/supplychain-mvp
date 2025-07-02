@@ -1,93 +1,73 @@
-import { useState, useRef, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { Home, Truck, Package, Users, BarChart, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import logo from '../assets/logo-navbar.jpg';
+import {
+  Home,
+  Package,
+  Users,
+  DollarSign,
+  Megaphone,
+} from "lucide-react";
+import logoSidebar from "../assets/logo-Sidebar.jpg";
+import { NavLink, useLocation } from "react-router-dom";
 
-export default function Sidebar() {
-  const [width, setWidth] = useState(220);
-  const sidebarRef = useRef(null);
-  const isResizing = useRef(false);
+const menuItems = [
+  { name: "Acceuil", icon: Home, path: "/dashboard" },
+  { name: "Commande Client", icon: Package, path: "/commande-client" },
+  { name: "Stock", icon: Users, path: "/stock" },
+  { name: "Fournisseur", icon: DollarSign, path: "/fournisseur" },
+  { name: "Reporting", icon: Megaphone, path: "/reporting" },
+];
 
-  const MIN_WIDTH = 80;
-  const MAX_WIDTH = 400;
-  const THRESHOLD = 150;
-
-  const startResize = () => {
-    isResizing.current = true;
-  };
-
-  const stopResize = () => {
-    isResizing.current = false;
-  };
-
-  const handleResize = (e) => {
-    if (!isResizing.current) return;
-    const newWidth = e.clientX;
-    if (newWidth > MIN_WIDTH && newWidth < MAX_WIDTH) {
-      setWidth(newWidth);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousemove', handleResize);
-    document.addEventListener('mouseup', stopResize);
-    return () => {
-      document.removeEventListener('mousemove', handleResize);
-      document.removeEventListener('mouseup', stopResize);
-    };
-  }, []);
-
-  const toggleSidebar = () => {
-    setWidth(width > MIN_WIDTH + 10 ? MIN_WIDTH : 220);
-  };
-
-  const menu = [
-    { label: 'Accueil', icon: <Home />, path: '/dashboard' },
-    { label: 'Fournisseur', icon: <Truck />, path: '/fournisseur' },
-    { label: 'Stock', icon: <Package />, path: '/stock' },
-    { label: 'Commande Client', icon: <Users />, path: '/commande-client' },
-    { label: 'Reporting', icon: <BarChart />, path: '/reporting' },
-  ];
+export default function Sidebar({ collapsed }) {
+  const location = useLocation();
 
   return (
-    <div
-      ref={sidebarRef}
-      className="h-screen bg-white shadow-md relative z-10 transition-all duration-300"
-      style={{ width: `${width}px` }}
-    >
-      {/* Logo et bouton de toggle */}
-      <div className="flex items-center justify-between px-4 py-3">
-        {width > THRESHOLD && (
-          <img src={logo} alt="AccurConsulting Logo" className="h-10 w-auto" />
-        )}
-        <button onClick={toggleSidebar} className="text-gray-500 hover:text-black">
-          {width > THRESHOLD ? <ChevronsLeft /> : <ChevronsRight />}
-        </button>
-      </div>
-
-      {/* Menu */}
-      <nav className="flex flex-col mt-4">
-        {menu.map((item, index) => (
-          <NavLink
-            key={index}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center gap-4 px-4 py-3 text-gray-700 hover:bg-gray-100 transition-all ${
-                isActive ? 'bg-blue-100 font-semibold text-blue-600' : ''
-              }`
-            }
-          >
-            <span>{item.icon}</span>
-            {width > THRESHOLD && <span>{item.label}</span>}
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* Barre de redimensionnement */}
+    <div className="flex min-h-screen">
       <div
-        onMouseDown={startResize}
-        className="absolute top-0 right-0 w-2 h-full cursor-col-resize bg-transparent"
-      ></div>
+        className={`transition-all duration-400 flex flex-col justify-between ${
+          collapsed ? "w-25" : "w-70"
+        } bg-white shadow-xl`}
+      >
+        <div>
+          {/* Header - Logo + App Name */}
+          <div
+            className={`flex items-center py-5 ${
+              collapsed ? "justify-center px-0" : "justify-between px-3"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              <img src={logoSidebar} alt="Logo" className="h-15 w-15" />
+              {!collapsed && (
+                <h1 className="text-sm font-bold text-[#3c352f]">
+                  Controle Tower Supply Chain
+                </h1>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <nav className={`flex flex-col gap-3 mt-10 ${collapsed ? "items-center" : "px-4"}`}>
+            {menuItems.map(({ name, icon: Icon, path }) => {
+              const isActive = location.pathname === path;
+
+              return (
+                <NavLink
+                  key={name}
+                  to={path}
+                  className={`flex items-center gap-4 py-5 rounded-lg text-sm font-medium transition-all duration-200
+                    ${
+                      isActive
+                        ? "bg-[#bfa76f] text-white"
+                        : "text-[#3c352f] hover:bg-[#f0ede5]"
+                    }
+                    ${collapsed ? "justify-center px-0" : "px-3"}`}
+                >
+                  <Icon className="h-6 w-6" />
+                  {!collapsed && <span className="truncate">{name}</span>}
+                </NavLink>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
     </div>
   );
 }
