@@ -10,14 +10,22 @@ export default function MainLayout({ children }) {
   const navigate = useNavigate();
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    // Lire depuis le localStorage au montage
+    const stored = localStorage.getItem("sidebar-collapsed");
+    return stored === "true";
+  });
+
+  // 🔁 Mise à jour du localStorage à chaque changement
+  useEffect(() => {
+    localStorage.setItem("sidebar-collapsed", collapsed.toString());
+  }, [collapsed]);
 
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      console.log('User:', user);
       if (user?.email) {
         const name = formatUserName(user.email); 
         setDisplayName(name);
@@ -34,13 +42,11 @@ export default function MainLayout({ children }) {
   };
 
   return (
-     <div className="flex min-h-screen bg-[#F1F3F2] ">
+    <div className="flex min-h-screen bg-[#F1F3F2]">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-       <Header collapsed={collapsed} setCollapsed={setCollapsed} onLogout={logout} email={email} userName={displayName}/>
+      <Header collapsed={collapsed} setCollapsed={setCollapsed} onLogout={logout} email={email} userName={displayName}/>
       <main className="flex-1 p-8">
-        <div className="flex justify-end mb-6">
-          
-        </div>
+        <div className="flex justify-end mb-6"></div>
         {children}
       </main>
     </div>
