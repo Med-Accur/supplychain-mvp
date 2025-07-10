@@ -58,7 +58,7 @@ export default function Sidebar({ collapsed }) {
                         ? "bg-[#bfa76f] text-white"
                         : "text-[#3c352f] hover:bg-[#f0ede5]"
                     }
-                    ${collapsed ? "justify-center px-0" : "px-3"}`}
+                    ${collapsed ? "justify-center px-4" : "px-4"}`}
                 >
                   <Icon className="h-6 w-6" />
                   {!collapsed && <span className="truncate">{name}</span>}

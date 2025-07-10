@@ -4,7 +4,7 @@ import { Truck, Users, Clock, List, ChevronDown } from 'lucide-react';
 import { supabase } from '../supabase/supabase.jsx';
 
 const kpiOptions = [
-  { key: 'nb_commandes', title: 'Nombre total de commandes', icon: <Users />, format: v => v },
+  { key: 'nb_commandes', title: 'Nbr total de commandes', icon: <Users />, format: v => v },
   { key: 'taux_retards', title: 'Taux de retard', icon: <Clock />, format: v => `${v}%` },
   { key: 'otif', title: 'Livraison à temps (OTIF)', icon: <Truck />, format: v => `${v}%` },
   { key: 'taux_annulation', title: 'Taux d’annulation', icon: <List />, format: v => `${v}%` },
