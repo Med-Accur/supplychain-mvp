@@ -1,1 +1,16 @@
 @import "tailwindcss";
+.react-resizable-handle {
+    width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: se-resize; /* garde le curseur de redimension */
+  opacity: 0; /* invisible mais toujours là */
+  pointer-events: auto; /* reste cliquable */
+  z-index: 1000; /* au-dessus pour être interactif */
+}
+
+.react-grid-placeholder {
+  display: none !important;
+}
+
