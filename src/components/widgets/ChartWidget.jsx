@@ -23,7 +23,8 @@ const data = [
   { name: 'Dec', uv: 189, pv: 300 },
 ];
 
-const ChartWidget = React.memo(() => (
+const ChartWidget = () => (
+  
   <div className="w-full h-full min-w-[300px] min-h-[200px] p-0">
     <ResponsiveContainer width="100%" height="100%">
       <LineChart
@@ -38,6 +39,6 @@ const ChartWidget = React.memo(() => (
       </LineChart>
     </ResponsiveContainer>
   </div>
-));
+);
 
 export default ChartWidget;

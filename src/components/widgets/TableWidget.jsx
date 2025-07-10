@@ -1,93 +1,129 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../supabase/supabase';
 
-const orders = [
-  {
-    id: 1,
-    date: '2025-07-01',
-    price: '€120.00',
-    status: 'Livrée',
-    client: 'Jean Dupont',
-    payment: 'Carte bancaire',
-    country: 'France'
-  },
-  {
-    id: 2,
-    date: '2025-07-02',
-    price: '€75.50',
-    status: 'En cours',
-    client: 'Alice Martin',
-    payment: 'PayPal',
-    country: 'Belgique'
-  },
-  {
-    id: 3,
-    date: '2025-07-03',
-    price: '€210.99',
-    status: 'Annulée',
-    client: 'Marc Bernard',
-    payment: 'Virement',
-    country: 'France'
-  },
-  {
-    id: 4,
-    date: '2025-07-04',
-    price: '€99.00',
-    status: 'Livrée',
-    client: 'Sophie Leclerc',
-    payment: 'Carte bancaire',
-    country: 'Suisse'
-  },
-  {
-    id: 5,
-    date: '2025-07-05',
-    price: '€55.75',
-    status: 'En attente',
-    client: 'Luc Moreau',
-    payment: 'PayPal',
-    country: 'Luxembourg'
-  },
-];
+const TableWidget = ({ widgetKey }) => {
+  const [data, setData] = useState([]);
+  const [columns, setColumns] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [widgetConfig, setWidgetConfig] = useState(null);
 
-const statusColor = {
-  'Livrée': 'text-green-700 bg-green-100',
-  'En cours': 'text-blue-700 bg-blue-100',
-  'Annulée': 'text-red-700 bg-red-100',
-  'En attente': 'text-yellow-700 bg-yellow-100',
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  useEffect(() => {
+    const fetchWidgetConfig = async () => {
+      const { data, error } = await supabase
+        .from('available_widgets')
+        .select('*')
+        .eq('key', widgetKey)
+        .single();
+
+      if (error) {
+        console.error('Erreur widget:', error);
+        return;
+      }
+
+      setWidgetConfig(data);
+    };
+
+    fetchWidgetConfig();
+  }, [widgetKey]);
+
+  useEffect(() => {
+    if (!widgetConfig) return;
+
+    const fetchData = async () => {
+      setLoading(true);
+      const { data, error } = await supabase.rpc('get_table_commande');
+
+      if (error) {
+        console.error('Erreur RPC:', error);
+        setLoading(false);
+        return;
+      }
+
+      // Trie les données par date et limite à 100 (par exemple)
+      const sorted = data.sort(
+        (a, b) => new Date(b.date_prevue) - new Date(a.date_prevue)
+      );
+
+      setData(sorted);
+      if (widgetConfig.columns && Array.isArray(widgetConfig.columns)) {
+        setColumns(widgetConfig.columns);
+      } else if (sorted.length > 0) {
+        setColumns(Object.keys(sorted[0]).map((key) => ({ key, label: key })));
+      }
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, [widgetConfig]);
+
+  const totalPages = Math.ceil(data.length / pageSize);
+  const paginatedData = data.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  if (loading) return <p>Chargement...</p>;
+  if (!data.length) return <p>Aucune donnée à afficher.</p>;
+
+  return (
+    <div>
+      <div className="overflow-auto">
+        <table className="min-w-full text-sm text-gray-70">
+          <thead className="bg-gray-100 text-xs uppercase text-gray-600">
+            <tr>
+              {columns.map((col) => (
+                <th key={col} className="px-3 py-2 text-left capitalize">
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className='divide-y divide-gray-200'>
+            {paginatedData.map((row, idx) => (
+              <tr key={idx} className='hover:bg-gray-50'>
+                {columns.map((col) => (
+                  <td key={col} className="px-3 py-2">
+                    {row[col] !== null ? String(row[col]) : ''}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination controls */}
+      <div className="flex justify-between items-center mt-3 text-sm">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Précédent
+        </button>
+        <span>
+          Page {currentPage} sur {totalPages}
+        </span>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Suivant
+        </button>
+      </div>
+    </div>
+  );
 };
-
-const TableWidget = React.memo(() => (
-  <div className="overflow-x-auto">
-    <table className="min-w-full text-sm text-gray-700">
-      <thead className="bg-gray-100 text-xs uppercase text-gray-600">
-        <tr>
-          <th className="px-3 py-2 text-left">ID</th>
-          <th className="px-3 py-2 text-left">Date</th>
-          <th className="px-3 py-2 text-left">Client</th>
-          <th className="px-3 py-2 text-left">Prix</th>
-          <th className="px-3 py-2 text-left">Statut</th>
-          <th className="px-3 py-2 text-left">Paiement</th>
-          <th className="px-3 py-2 text-left">Pays</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-200">
-        {orders.map((order) => (
-          <tr key={order.id} className="hover:bg-gray-50">
-            <td className="px-3 py-2">{order.id}</td>
-            <td className="px-3 py-2">{order.date}</td>
-            <td className="px-3 py-2">{order.client}</td>
-            <td className="px-3 py-2">{order.price}</td>
-            <td className="px-3 py-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColor[order.status]}`}>
-                {order.status}
-              </span>
-            </td>
-            <td className="px-3 py-2">{order.payment}</td>
-            <td className="px-3 py-2">{order.country}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-));
 
 export default TableWidget;
